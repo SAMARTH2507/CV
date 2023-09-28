@@ -10,19 +10,25 @@ updatedAt:"2023-09-28T12:58:45.728Z"}]
 
 
 
-const medTimelineData = medTimelineOpenData || []; // Ensure medTimelineOpenData is not null
+function filterAndCountData(data) {
+  return data.reduce((result, item) => {
+    const createdAtDate = item.createdAt.split('T')[0]; // Extract the date part
 
-const filteredData = medTimelineData.reduce((result, item) => {
-  const createdAtDate = item.createdAt.split('T')[0]; // Extract the date part
+    if (!result[createdAtDate]) {
+      result[createdAtDate] = 0;
+    }
 
-  if (!result[createdAtDate]) {
-    result[createdAtDate] = 0;
-  }
+    result[createdAtDate]++;
 
-  result[createdAtDate]++;
+    return result;
+  }, {});
+}
 
-  return result;
-}, {});
+// Example usage:
+const filteredCkdData = filterAndCountData(ckdOpenData || []);
+const filteredWorklistData = filterAndCountData(worklistOpenData || []);
+const filteredDashboardData = filterAndCountData(dashboardOpenData || []);
 
-// filteredData now contains counts for each unique createdAt date
-console.log(filteredData);
+console.log('CKD Data:', filteredCkdData);
+console.log('Worklist Data:', filteredWorklistData);
+console.log('Dashboard Data:', filteredDashboardData);
