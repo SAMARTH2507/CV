@@ -1,0 +1,190 @@
+import React, { useState, useEffect } from 'react'
+import {
+  BaseBarChart,
+  Select,
+  setColorHierarchy,
+  Switch,
+  PopoverTailIcon
+} from '@cds/cds-ui-components'
+import { DollarsSaved } from '../../../../types/dollars-saved.types'
+import { Card, useTheme } from '@material-ui/core'
+import { Popover } from '@material-ui/core'
+import Typography from '@material-ui/core/Typography'
+import InfoIcon from '@material-ui/icons/Info'
+import format from 'date-fns/format'
+import { Legend, XAxis, Tooltip, YAxis, TooltipProps, Bar } from 'recharts'
+import { useToken } from '../../../../providers/token-provider'
+import { ValueType, NameType } from 'recharts/types/component/DefaultTooltipContent'
+import OtherToolsGraphStyles from './other-tools-graph.styles'
+import fetchData from '../../../../../pages/api/recommendations-graph'
+
+interface OtherToolsChartProps {}
+const OtherToolsGraph = ({}: OtherToolsChartProps) => {
+  const theme = useTheme()
+  const classes = OtherToolsGraphStyles()
+  const {
+    token: { jwt }
+  } = useToken()
+  // const { token } = useToken()
+  const queryParams: Record<string, any> = {
+    _token: jwt,
+    _cache: format(Date.now(), 'yyyyMMddHHmm')
+  }
+
+  const [anchorEl, setAnchorEl] = useState(null)
+  const [barGraphData, setBarGraphData] = useState<any>(null)
+  const [ehrToggle, setEhrToggle] = useState(true)
+  const [displayEhrToggle, setDisplayEhrToggle] = useState(true)
+
+  const renderBlackLegendText = (value: string) => {
+    return <span className={classes.legendText}>{value}</span>
+  }
+
+  console.log('Token:', jwt)
+
+  const formatXAxisDate = (date: string) => {
+    const formattedDate = new Date(date)
+    const month = (formattedDate.getMonth() + 1).toString()
+    const day = formattedDate.getDate().toString()
+    const year = formattedDate.getFullYear().toString().slice(-2)
+    return `${month}/${day}/${year}`
+  }
+
+  const formatDateForTooltip = (date: string) => {
+    const formattedDateForToolTip = new Date(date)
+    const month = formattedDateForToolTip.toLocaleString('default', { month: 'short' })
+    const day = formattedDateForToolTip.getDate().toString()
+    const year = formattedDateForToolTip.getFullYear().toString()
+    return `${month} ${day}, ${year}`
+  }
+
+  const handleEhrToggle = () => {
+    setEhrToggle(!ehrToggle)
+  }
+
+  const handlePopoverOpen = (event: any) => {
+    setAnchorEl(event.currentTarget)
+  }
+
+  const handlePopoverClose = () => {
+    setAnchorEl(null)
+  }
+
+  const isEhrData = (data: DollarsSaved[]) => {
+    let displayToggle = false
+    data.forEach((entry: any) => {
+      if (entry?.dollarsSavedEhrOnly > 0) {
+        return (displayToggle = true)
+      }
+    })
+    return displayToggle
+  }
+
+  const CustomTooltip = ({ active, payload }: TooltipProps<ValueType, NameType>) => {
+    if (active && barGraphData) {
+      const dateToShow = formatDateForTooltip(barGraphData.date)
+      let valuetoShow
+      if (barGraphData.tooltipPayload?.[0]?.dataKey === 'value1') {
+        valuetoShow = `Saved Decision in Recommender: ${Number(payload?.[0]?.value)}`
+      } else if (barGraphData.tooltipPayload?.[0]?.dataKey === 'value2') {
+        valuetoShow = `Saved Decision in EHR: ${Number(payload?.[1]?.value)}`
+      } else {
+        valuetoShow = `No Decision: ${Number(payload?.[2]?.value)}`
+      }
+      return (
+        <>
+          <div className={classes.tooltipBody}>
+            {/* <p className="label">{dateToShow}</p> */}
+            <p className="label">
+              {dateToShow} <br />
+              {valuetoShow}
+            </p>
+          </div>
+          <div className={classes.tailIcon}>
+            <PopoverTailIcon
+              size={'large'}
+              fillColor={'white'}
+              className={classes.tooltipArrow}
+            />
+          </div>
+        </>
+      )
+    }
+    return null
+  }
+
+  // The Below Commented out codes will get Used when API fetch problem will get solved
+
+  // const [chartData, setChartData] = useState<any[]>([])
+  // const [fromDate, setFromDate] = useState('2023-01-01')
+  // const [toDate, setToDate] = useState('2023-09-07')
+  // const [cdoId, setCdoId] = useState('optum-fl')
+  // const [token, setToken] = useState(
+  //   'eyJhbGciOiJIUzI1NiJ9.eyJwcmFjdGl0aW9uZXIiOnsiaWQiOiJzcGFuZDE0NSIsIm5hbWUiOiJTYW1hcnRoIFBhbmRleSJ9LCJhY2Nlc3NfdG9rZW4iOiJvaGlkX3Rva2VuIiwicm9sZSI6ImFkbWluIiwiaWF0IjoxNjk1NjcyNTAyLCJleHAiOjE2OTU2Nzk3MDJ9.EYbHbQ0mqLc0Y1RlPbRYEma4NHahNCq37LWew6lzHso'
+  // )
+
+  // const fetchDataAndProcess = async () => {
+  //   try {
+  //     const fetchDataResult = await fetchData(fromDate, toDate, cdoId, token)
+  //     console.log('data fetch:', fetchDataResult)
+  //     const dataForChart = getDataFromApi(fetchDataResult)
+  //     setChartData(dataForChart)
+  //   } catch (error) {
+  //     console.error('Error fetching data:', error)
+  //   }
+  // }
+  // fetchDataAndProcess()
+  // console.log('The json data ', { chartData })
+
+  const dataKeys = {
+    xAxis: 'date',
+    yAxis: 'value',
+    graphDataKey: ['value']
+  }
+
+  return (
+    <div>
+      <BaseBarChart
+        height={350}
+        barSize={20}
+        data={Chartdata}
+        dataKeys={dataKeys}
+        title="Recommendation Per Day"
+        layout="horizontal"
+        label={dataKeys.yAxis}
+        labelPosition="top"
+        barProps={{
+          onMouseEnter: (data: any) => {
+            setBarGraphData(data)
+          },
+          onMouseLeave: () => setBarGraphData(null)
+        }}
+      >
+        <XAxis
+          dataKey={dataKeys.xAxis}
+          label={{ position: 'insideBottom', onset: -10 }}
+          tickLine={false}
+          axisLine={false}
+          tickFormatter={formatXAxisDate}
+          angle={-45}
+          dy={20}
+          height={47}
+        />
+        {/* <YAxis label={{ position: 'insideLeft', angle: -90 }} /> */}
+        <Tooltip
+          content={<CustomTooltip />}
+          allowEscapeViewBox={{
+            x: true,
+            y: true
+          }}
+          cursor={false}
+          offset={-74}
+          wrapperStyle={{ outline: 'none', marginLeft: '24px' }}
+          isAnimationActive={false}
+        />
+      </BaseBarChart>
+    </div>
+  )
+}
+
+export default OtherToolsGraph
