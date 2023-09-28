@@ -20,12 +20,13 @@ import fetchData from '../../../../../pages/api/recommendations-graph'
 import { DateValues } from '../../../../components/atoms/filter-value-header.component'
 
 interface OtherToolsChartProps {
-  ChartData: any
+  chartData: Array<{ date: string; count: number }>
   selectedDate: any
 }
 
-const OtherToolsGraph = ({ ChartData, selectedDate }: OtherToolsChartProps) => {
-  console.log(ChartData)
+const OtherToolsGraph = ({ chartData, selectedDate }: OtherToolsChartProps) => {
+  console.log(chartData)
+
   const generateDateRange = (
     startDate: string | number | Date,
     endDate: string | number | Date
@@ -38,6 +39,11 @@ const OtherToolsGraph = ({ ChartData, selectedDate }: OtherToolsChartProps) => {
     }
     return dates
   }
+  const transformedData = Object.entries(chartData).map((item) => ({
+    date: item[0],
+    count: item[1]
+  }))
+
   const theme = useTheme()
   const classes = OtherToolsGraphStyles()
   const {
@@ -65,6 +71,14 @@ const OtherToolsGraph = ({ ChartData, selectedDate }: OtherToolsChartProps) => {
     const day = formattedDateForToolTip.getDate().toString()
     const year = formattedDateForToolTip.getFullYear().toString()
     return `${month} ${day}, ${year}`
+  }
+
+  const formatXAxisDate = (date: string) => {
+    const formattedDate = new Date(date)
+    const month = (formattedDate.getMonth() + 1).toString()
+    const day = formattedDate.getDate().toString()
+    const year = formattedDate.getFullYear().toString().slice(-2)
+    return `${month}/${day}/${year}`
   }
 
   const handleEhrToggle = () => {
@@ -124,21 +138,28 @@ const OtherToolsGraph = ({ ChartData, selectedDate }: OtherToolsChartProps) => {
 
   const dataKeys = {
     xAxis: 'date',
-    yAxis: 'value',
-    graphDataKey: ['value']
+    yAxis: 'count',
+    graphDataKey: ['', 'count']
   }
 
   return (
     <div>
       <BaseBarChart
-        height={350}
-        barSize={20}
-        data={ChartData}
+        isStackable
+        height={290}
+        barSize={transformedData.length < 4 ? 150 : transformedData.length * 50}
+        data={transformedData}
         dataKeys={dataKeys}
-        title="Recommendation Per Day"
+        title="Other Tools"
         layout="horizontal"
         label={dataKeys.yAxis}
         labelPosition="top"
+        margin={{
+          top: 30,
+          right: 0,
+          left: 50,
+          bottom: 10
+        }}
         barProps={{
           onMouseEnter: (data: any) => {
             setBarGraphData(data)
@@ -150,16 +171,16 @@ const OtherToolsGraph = ({ ChartData, selectedDate }: OtherToolsChartProps) => {
           dataKey={dataKeys.xAxis}
           label={{ position: 'insideBottom', onset: -10 }}
           tickLine={false}
-          axisLine={true}
-          //tickFormatter={formatXAxisDate}
+          axisLine={false}
+          tickFormatter={formatXAxisDate}
           angle={-45}
           dy={20}
           height={47}
-          domain={
-            selectedDate
-              ? generateDateRange(selectedDate.startDate, selectedDate.endDate)
-              : []
-          }
+          //   domain={
+          //     selectedDate
+          //       ? generateDateRange(selectedDate.startDate, selectedDate.endDate)
+          //       : []
+          //   }
         />
         {/* <YAxis label={{ position: 'insideLeft', angle: -90 }} /> */}
         <Tooltip
@@ -169,7 +190,7 @@ const OtherToolsGraph = ({ ChartData, selectedDate }: OtherToolsChartProps) => {
             y: true
           }}
           cursor={false}
-          offset={-74}
+          offset={-98}
           wrapperStyle={{ outline: 'none', marginLeft: '24px' }}
           isAnimationActive={false}
         />
