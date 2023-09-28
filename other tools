@@ -71,13 +71,23 @@ const OtherTools = ({ loading, setLoading = () => {} }: OtherToolsProps) => {
     filterValues: JSON.stringify(filterValues, replacer)
   }
 
+  //const [doFilteredValues, setDoFilteredValues] = useState<any>([])
   const [queryParams, setQueryParams] = useState<Record<string, any>>(defaultQueryParams)
 
-  const { ckdOpen, worklistOpen, medTimelineOpen, dashboardOpen, error } =
-    useAppOpenHooks({
-      queryParams: { id: '0', ...queryParams }
-    })
-  console.log(worklistOpen)
+  const {
+    ckdOpen,
+    worklistOpen,
+    medTimelineOpen,
+    dashboardOpen,
+    ckdOpenData,
+    worklistOpenData,
+    medTimelineOpenData,
+    dashboardOpenData,
+    error
+  } = useAppOpenHooks({
+    queryParams: { id: '0', ...queryParams }
+  })
+  console.log(medTimelineOpenData)
 
   const { pricingTransaction } = usePricingTransactionHooks({ queryParams })
 
