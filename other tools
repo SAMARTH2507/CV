@@ -118,7 +118,7 @@ const OtherTools = ({ loading, setLoading = () => {} }: OtherToolsProps) => {
                   title="CKD Opens"
                   content={
                     <OtherToolsGraph
-                      ChartData={ckdOpen}
+                      value={ckdOpen}
                       selectedDate={filterValues.dateValues}
                     />
                   }
@@ -170,7 +170,7 @@ const OtherTools = ({ loading, setLoading = () => {} }: OtherToolsProps) => {
                   title="Worklist Opens"
                   content={
                     <OtherToolsGraph
-                      ChartData={worklistOpen}
+                      value={worklistOpen}
                       selectedDate={filterValues.dateValues}
                     />
                   }
@@ -222,7 +222,7 @@ const OtherTools = ({ loading, setLoading = () => {} }: OtherToolsProps) => {
                   title="Med Timeline Opens"
                   content={
                     <OtherToolsGraph
-                      ChartData={medTimelineOpen}
+                      value={medTimelineOpen}
                       selectedDate={filterValues.dateValues}
                     />
                   }
@@ -274,7 +274,7 @@ const OtherTools = ({ loading, setLoading = () => {} }: OtherToolsProps) => {
                   title="Dashboard Opens"
                   content={
                     <OtherToolsGraph
-                      ChartData={dashboardOpen}
+                      value={dashboardOpen}
                       selectedDate={filterValues.dateValues}
                     />
                   }
@@ -326,7 +326,7 @@ const OtherTools = ({ loading, setLoading = () => {} }: OtherToolsProps) => {
                   title="Pricing Calls"
                   content={
                     <OtherToolsGraph
-                      ChartData={pricingTransaction}
+                      value={pricingTransaction}
                       selectedDate={filterValues.dateValues}
                     />
                   }
