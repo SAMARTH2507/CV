@@ -1,0 +1,59 @@
+const OtherToolsGraph = ({ ChartData, selectedDate }: OtherToolsChartProps) => {
+  // Create a function to filter the data based on the selected date range
+  const filterDataByDateRange = () => {
+    if (!selectedDate) {
+      return ChartData; // If no date range is selected, return the original data
+    }
+
+    // Filter the data based on the selected date range
+    return ChartData.filter((dataPoint) => {
+      const date = new Date(dataPoint.date).getTime();
+      const startDate = new Date(selectedDate.startDate).getTime();
+      const endDate = new Date(selectedDate.endDate).getTime();
+
+      return date >= startDate && date <= endDate;
+    });
+  };
+
+  // Get the filtered data
+  const filteredData = filterDataByDateRange();
+
+  // ... (other code)
+
+  return (
+    <div>
+      <BaseBarChart
+        height={350}
+        barSize={20}
+        data={filteredData} // Use the filtered data here
+        dataKeys={dataKeys}
+        title="Recommendation Per Day"
+        layout="horizontal"
+        label={dataKeys.yAxis}
+        labelPosition="top"
+        barProps={{
+          onMouseEnter: (data: any) => {
+            setBarGraphData(data);
+          },
+          onMouseLeave: () => setBarGraphData(null),
+        }}
+      >
+        <XAxis
+          dataKey={dataKeys.xAxis}
+          label={{ position: 'insideBottom', onset: -10 }}
+          tickLine={false}
+          axisLine={true}
+          angle={-45}
+          dy={20}
+          height={47}
+          domain={
+            selectedDate
+              ? generateDateRange(selectedDate.startDate, selectedDate.endDate)
+              : []
+          }
+        />
+        {/* ... (rest of your chart code) */}
+      </BaseBarChart>
+    </div>
+  );
+};
