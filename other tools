@@ -116,7 +116,12 @@ const OtherTools = ({ loading, setLoading = () => {} }: OtherToolsProps) => {
               content: (
                 <Tile
                   title="CKD Opens"
-                  content={<RecommendationsGraph />}
+                  content={
+                    <OtherToolsGraph
+                      ChartData={ckdOpen}
+                      selectedDate={filterValues.dateValues}
+                    />
+                  }
                   titleTooltip={
                     <Tooltip title="" content="Tooltip content **here**" markdown>
                       <IconButton
@@ -163,7 +168,12 @@ const OtherTools = ({ loading, setLoading = () => {} }: OtherToolsProps) => {
               content: (
                 <Tile
                   title="Worklist Opens"
-                  content={<OtherToolsGraph Chartdata={worklistOpen} />}
+                  content={
+                    <OtherToolsGraph
+                      ChartData={worklistOpen}
+                      selectedDate={filterValues.dateValues}
+                    />
+                  }
                   titleTooltip={
                     <Tooltip title="" content="Tooltip content **here**" markdown>
                       <IconButton
@@ -210,7 +220,12 @@ const OtherTools = ({ loading, setLoading = () => {} }: OtherToolsProps) => {
               content: (
                 <Tile
                   title="Med Timeline Opens"
-                  content={<RecommendationsGraph />}
+                  content={
+                    <OtherToolsGraph
+                      ChartData={medTimelineOpen}
+                      selectedDate={filterValues.dateValues}
+                    />
+                  }
                   titleTooltip={
                     <Tooltip title="" content="Tooltip content **here**" markdown>
                       <IconButton
@@ -257,7 +272,12 @@ const OtherTools = ({ loading, setLoading = () => {} }: OtherToolsProps) => {
               content: (
                 <Tile
                   title="Dashboard Opens"
-                  content={<RecommendationsGraph />}
+                  content={
+                    <OtherToolsGraph
+                      ChartData={dashboardOpen}
+                      selectedDate={filterValues.dateValues}
+                    />
+                  }
                   titleTooltip={
                     <Tooltip title="" content="Tooltip content **here**" markdown>
                       <IconButton
@@ -304,7 +324,12 @@ const OtherTools = ({ loading, setLoading = () => {} }: OtherToolsProps) => {
               content: (
                 <Tile
                   title="Pricing Calls"
-                  content={<RecommendationsGraph />}
+                  content={
+                    <OtherToolsGraph
+                      ChartData={pricingTransaction}
+                      selectedDate={filterValues.dateValues}
+                    />
+                  }
                   titleTooltip={
                     <Tooltip title="" content="Tooltip content **here**" markdown>
                       <IconButton
