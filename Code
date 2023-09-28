@@ -7,3 +7,22 @@ patientId:"Positive-TestEndToEnd"
 providerId:"26616"
 tool:"med-timeline"
 updatedAt:"2023-09-28T12:58:45.728Z"}]
+
+
+
+const medTimelineData = medTimelineOpenData || []; // Ensure medTimelineOpenData is not null
+
+const filteredData = medTimelineData.reduce((result, item) => {
+  const createdAtDate = item.createdAt.split('T')[0]; // Extract the date part
+
+  if (!result[createdAtDate]) {
+    result[createdAtDate] = 0;
+  }
+
+  result[createdAtDate]++;
+
+  return result;
+}, {});
+
+// filteredData now contains counts for each unique createdAt date
+console.log(filteredData);
