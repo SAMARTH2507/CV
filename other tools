@@ -1,0 +1,353 @@
+import {
+  Grid,
+  GridRowProps,
+  InformationIcon,
+  Option,
+  Tooltip,
+  useThemeContext
+} from '@cds/cds-ui-components'
+import React, { Dispatch, SetStateAction, useEffect, useState } from 'react'
+import { Tile, TileContent } from '@cds/cds-ui-components'
+import useAppOpenHooks from '../../hooks/client-activity/app-open.hooks'
+import useRecommendationHooks from '../../hooks/client-activity/recommendations.hooks'
+import { useToken } from '../../providers/token-provider'
+import { useEhr } from '../../providers/ehr-provider'
+import { format } from 'date-fns'
+import FilterGroupWrapper from '../../components/atoms/filter-group-wrapper.component'
+import FilterValueHeader, {
+  DateValues
+} from '../../components/atoms/filter-value-header.component'
+import { contentOptions, dateOptions, locationOptions } from '../../utils/filter-options'
+import { replacer } from '../../utils/maps'
+import useExternalDecisionTrackerHooks from '../../hooks/client-activity/external-decision.hooks'
+import useOrderHooks from '../../hooks/client-activity/orders.hooks'
+import usePricingTransactionHooks from '../../hooks/client-activity/pricing-transaction.hooks'
+import RecommendationsGraph from '../clinical-assistant/medication-recommender/recommendations-graph/recommendations-graph.component'
+import { Box, IconButton } from '@material-ui/core'
+import OtherToolsGraph from '../clinical-assistant/medication-recommender/other-tools-chart/other-tools-graph.component'
+
+type OtherToolsProps = {
+  loading: boolean
+  setLoading?: Dispatch<SetStateAction<boolean>>
+}
+
+export type FilterValues = {
+  dateValues: DateValues
+  selectValues: Map<string, Option[]>
+}
+
+// Date options are handled separately since they are always required and use a different component than a regular multi-Select
+const filterOptionsMap = new Map<string, Option[]>([
+  ['Location', locationOptions],
+  ['Content', contentOptions]
+])
+
+const OtherTools = ({ loading, setLoading = () => {} }: OtherToolsProps) => {
+  const { theme } = useThemeContext()
+
+  const {
+    token: { jwt }
+  } = useToken()
+
+  const [filterValues, setFilterValues] = useState<FilterValues>({
+    dateValues: {
+      startDate: new Date().toISOString()?.split('T')?.[0],
+      endDate: new Date().toISOString()?.split('T')?.[0]
+    },
+    selectValues: new Map([
+      ['Location', locationOptions],
+      ['Content', contentOptions]
+    ])
+  })
+
+  const { cdoConfig } = useEhr()
+  const cdoId = cdoConfig?.cdoId
+
+  const defaultQueryParams: Record<string, any> = {
+    ...(cdoId && { cdoId }),
+    _token: jwt,
+    _cache: format(Date.now(), 'yyyyMMddHHmm'),
+    isLocations: true,
+    filterValues: JSON.stringify(filterValues, replacer)
+  }
+
+  const [queryParams, setQueryParams] = useState<Record<string, any>>(defaultQueryParams)
+
+  const { ckdOpen, worklistOpen, medTimelineOpen, dashboardOpen, error } =
+    useAppOpenHooks({
+      queryParams: { id: '0', ...queryParams }
+    })
+  console.log(worklistOpen)
+
+  const { pricingTransaction } = usePricingTransactionHooks({ queryParams })
+
+  useEffect(() => {
+    if (loading) {
+      setLoading(!loading)
+    }
+  }, [setLoading, loading])
+
+  const tileRows: GridRowProps[] = [
+    {
+      spacing: 3,
+      columns: [
+        {
+          spacing: 3,
+          gridSize: { md: 2 },
+          items: [
+            {
+              height: {},
+              content: (
+                <Tile
+                  title="CKD Opens"
+                  content={<TileContent value={ckdOpen} />}
+                  hasError={error}
+                />
+              )
+            }
+          ]
+        },
+        {
+          spacing: 3,
+          gridSize: {},
+          items: [
+            {
+              height: {},
+              content: (
+                <Tile
+                  title="CKD Opens"
+                  content={<RecommendationsGraph />}
+                  titleTooltip={
+                    <Tooltip title="" content="Tooltip content **here**" markdown>
+                      <IconButton
+                        disableRipple
+                        aria-label="Icon"
+                        style={{ padding: '0px 8px' }}
+                      >
+                        <InformationIcon className="infoIcon" size={'medium'} />
+                      </IconButton>
+                    </Tooltip>
+                  }
+                />
+              )
+            }
+          ]
+        }
+      ]
+    },
+    {
+      spacing: 3,
+      columns: [
+        {
+          spacing: 3,
+          gridSize: { md: 2 },
+          items: [
+            {
+              height: {},
+              content: (
+                <Tile
+                  title="Worklist Opens"
+                  content={<TileContent value={worklistOpen} />}
+                  hasError={error}
+                />
+              )
+            }
+          ]
+        },
+        {
+          spacing: 3,
+          gridSize: {},
+          items: [
+            {
+              height: {},
+              content: (
+                <Tile
+                  title="Worklist Opens"
+                  content={<OtherToolsGraph Chartdata={worklistOpen} />}
+                  titleTooltip={
+                    <Tooltip title="" content="Tooltip content **here**" markdown>
+                      <IconButton
+                        disableRipple
+                        aria-label="Icon"
+                        style={{ padding: '0px 8px' }}
+                      >
+                        <InformationIcon className="infoIcon" size={'medium'} />
+                      </IconButton>
+                    </Tooltip>
+                  }
+                />
+              )
+            }
+          ]
+        }
+      ]
+    },
+    {
+      spacing: 3,
+      columns: [
+        {
+          spacing: 3,
+          gridSize: { md: 2 },
+          items: [
+            {
+              height: {},
+              content: (
+                <Tile
+                  title="Med Timeline Opens"
+                  content={<TileContent value={medTimelineOpen} />}
+                  hasError={error}
+                />
+              )
+            }
+          ]
+        },
+        {
+          spacing: 3,
+          gridSize: {},
+          items: [
+            {
+              height: {},
+              content: (
+                <Tile
+                  title="Med Timeline Opens"
+                  content={<RecommendationsGraph />}
+                  titleTooltip={
+                    <Tooltip title="" content="Tooltip content **here**" markdown>
+                      <IconButton
+                        disableRipple
+                        aria-label="Icon"
+                        style={{ padding: '0px 8px' }}
+                      >
+                        <InformationIcon className="infoIcon" size={'medium'} />
+                      </IconButton>
+                    </Tooltip>
+                  }
+                />
+              )
+            }
+          ]
+        }
+      ]
+    },
+    {
+      spacing: 3,
+      columns: [
+        {
+          spacing: 3,
+          gridSize: { md: 2 },
+          items: [
+            {
+              height: {},
+              content: (
+                <Tile
+                  title="Dashboard Opens"
+                  content={<TileContent value={dashboardOpen} />}
+                  hasError={error}
+                />
+              )
+            }
+          ]
+        },
+        {
+          spacing: 3,
+          gridSize: {},
+          items: [
+            {
+              height: {},
+              content: (
+                <Tile
+                  title="Dashboard Opens"
+                  content={<RecommendationsGraph />}
+                  titleTooltip={
+                    <Tooltip title="" content="Tooltip content **here**" markdown>
+                      <IconButton
+                        disableRipple
+                        aria-label="Icon"
+                        style={{ padding: '0px 8px' }}
+                      >
+                        <InformationIcon className="infoIcon" size={'medium'} />
+                      </IconButton>
+                    </Tooltip>
+                  }
+                />
+              )
+            }
+          ]
+        }
+      ]
+    },
+    {
+      spacing: 3,
+      columns: [
+        {
+          spacing: 3,
+          gridSize: { md: 2 },
+          items: [
+            {
+              height: {},
+              content: (
+                <Tile
+                  title="Pricing Calls"
+                  content={<TileContent value={pricingTransaction} />}
+                  hasError={error}
+                />
+              )
+            }
+          ]
+        },
+        {
+          spacing: 3,
+          gridSize: {},
+          items: [
+            {
+              height: {},
+              content: (
+                <Tile
+                  title="Pricing Calls"
+                  content={<RecommendationsGraph />}
+                  titleTooltip={
+                    <Tooltip title="" content="Tooltip content **here**" markdown>
+                      <IconButton
+                        disableRipple
+                        aria-label="Icon"
+                        style={{ padding: '0px 8px' }}
+                      >
+                        <InformationIcon className="infoIcon" size={'medium'} />
+                      </IconButton>
+                    </Tooltip>
+                  }
+                />
+              )
+            }
+          ]
+        }
+      ]
+    }
+  ]
+
+  return (
+    <div
+      style={{
+        border: `2px solid white`,
+        backgroundColor: 'white'
+      }}
+    >
+      <h3>Other Apps and Tools</h3>
+      <FilterGroupWrapper
+        queryParams={queryParams}
+        setQueryParams={setQueryParams}
+        filterValues={filterValues}
+        setFilterValues={setFilterValues}
+        dateOptions={dateOptions}
+        filterOptionsMap={filterOptionsMap}
+      >
+        <div style={{ backgroundColor: '#f5f5f5', padding: theme.spacing(3) }}>
+          <FilterValueHeader filterValues={filterValues} />
+          <Grid rows={tileRows} spacing={3} />
+        </div>
+      </FilterGroupWrapper>
+    </div>
+  )
+}
+
+export default OtherTools
