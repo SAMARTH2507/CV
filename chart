@@ -17,15 +17,32 @@ import { useToken } from '../../../../providers/token-provider'
 import { ValueType, NameType } from 'recharts/types/component/DefaultTooltipContent'
 import OtherToolsGraphStyles from './other-tools-graph.styles'
 import fetchData from '../../../../../pages/api/recommendations-graph'
+import { DateValues } from '../../../../components/atoms/filter-value-header.component'
 
-interface OtherToolsChartProps {}
-const OtherToolsGraph = ({}: OtherToolsChartProps) => {
+interface OtherToolsChartProps {
+  ChartData: any
+  selectedDate: any
+}
+
+const OtherToolsGraph = ({ ChartData, selectedDate }: OtherToolsChartProps) => {
+  console.log(ChartData)
+  const generateDateRange = (
+    startDate: string | number | Date,
+    endDate: string | number | Date
+  ) => {
+    const dates = []
+    const currentDate = new Date(startDate)
+    while (currentDate <= new Date(endDate)) {
+      dates.push(currentDate.toISOString().split('T')[0])
+      currentDate.setDate(currentDate.getDate() + 1)
+    }
+    return dates
+  }
   const theme = useTheme()
   const classes = OtherToolsGraphStyles()
   const {
     token: { jwt }
   } = useToken()
-  // const { token } = useToken()
   const queryParams: Record<string, any> = {
     _token: jwt,
     _cache: format(Date.now(), 'yyyyMMddHHmm')
@@ -41,14 +58,6 @@ const OtherToolsGraph = ({}: OtherToolsChartProps) => {
   }
 
   console.log('Token:', jwt)
-
-  const formatXAxisDate = (date: string) => {
-    const formattedDate = new Date(date)
-    const month = (formattedDate.getMonth() + 1).toString()
-    const day = formattedDate.getDate().toString()
-    const year = formattedDate.getFullYear().toString().slice(-2)
-    return `${month}/${day}/${year}`
-  }
 
   const formatDateForTooltip = (date: string) => {
     const formattedDateForToolTip = new Date(date)
@@ -113,29 +122,6 @@ const OtherToolsGraph = ({}: OtherToolsChartProps) => {
     return null
   }
 
-  // The Below Commented out codes will get Used when API fetch problem will get solved
-
-  // const [chartData, setChartData] = useState<any[]>([])
-  // const [fromDate, setFromDate] = useState('2023-01-01')
-  // const [toDate, setToDate] = useState('2023-09-07')
-  // const [cdoId, setCdoId] = useState('optum-fl')
-  // const [token, setToken] = useState(
-  //   'eyJhbGciOiJIUzI1NiJ9.eyJwcmFjdGl0aW9uZXIiOnsiaWQiOiJzcGFuZDE0NSIsIm5hbWUiOiJTYW1hcnRoIFBhbmRleSJ9LCJhY2Nlc3NfdG9rZW4iOiJvaGlkX3Rva2VuIiwicm9sZSI6ImFkbWluIiwiaWF0IjoxNjk1NjcyNTAyLCJleHAiOjE2OTU2Nzk3MDJ9.EYbHbQ0mqLc0Y1RlPbRYEma4NHahNCq37LWew6lzHso'
-  // )
-
-  // const fetchDataAndProcess = async () => {
-  //   try {
-  //     const fetchDataResult = await fetchData(fromDate, toDate, cdoId, token)
-  //     console.log('data fetch:', fetchDataResult)
-  //     const dataForChart = getDataFromApi(fetchDataResult)
-  //     setChartData(dataForChart)
-  //   } catch (error) {
-  //     console.error('Error fetching data:', error)
-  //   }
-  // }
-  // fetchDataAndProcess()
-  // console.log('The json data ', { chartData })
-
   const dataKeys = {
     xAxis: 'date',
     yAxis: 'value',
@@ -147,7 +133,7 @@ const OtherToolsGraph = ({}: OtherToolsChartProps) => {
       <BaseBarChart
         height={350}
         barSize={20}
-        data={Chartdata}
+        data={ChartData}
         dataKeys={dataKeys}
         title="Recommendation Per Day"
         layout="horizontal"
@@ -164,11 +150,16 @@ const OtherToolsGraph = ({}: OtherToolsChartProps) => {
           dataKey={dataKeys.xAxis}
           label={{ position: 'insideBottom', onset: -10 }}
           tickLine={false}
-          axisLine={false}
-          tickFormatter={formatXAxisDate}
+          axisLine={true}
+          //tickFormatter={formatXAxisDate}
           angle={-45}
           dy={20}
           height={47}
+          domain={
+            selectedDate
+              ? generateDateRange(selectedDate.startDate, selectedDate.endDate)
+              : []
+          }
         />
         {/* <YAxis label={{ position: 'insideLeft', angle: -90 }} /> */}
         <Tooltip
